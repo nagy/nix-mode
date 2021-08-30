@@ -88,9 +88,9 @@ M-x nix-repl<RET>
 
 ### nix-store.el
 
-This file provides a command `M-x nix-store-show-path`. The command displays an
+This file provides the command `M-x nix-store-show-path`. The command displays an
 overview of a store path. The information it shows is the realisation status,
-the hash and the size of the store path. Also it shows lists of derivers,
+, hash and the size of the store path. Also it shows lists of derivers,
 references, referrers and requisites of the respective path.
 
 You can change the order in which that information is show. See the
