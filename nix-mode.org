@@ -48,7 +48,7 @@ recommended if you are interested in contributing to nix-mode.
 
 #+BEGIN_SRC sh
 $ mkdir -p ~/.emacs.d/site-lisp
-$ git clone https://github.com/matthewbauer/nix-mode.git ~/.emacs.d/site-lisp/nix-mode
+$ git clone https://github.com/NixOS/nix-mode.git ~/.emacs.d/site-lisp/nix-mode
 $ cd ~/.emacs.d/site-lisp/nix-mode
 #+END_SRC
 
