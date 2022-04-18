@@ -10,10 +10,9 @@
     packages = forAllSystems (system: with (import nixpkgs { inherit system; }); {
       nix-mode = let
         emacs = emacsWithPackages (epkgs: with epkgs; [
-          org-plus-contrib
+          org-contrib
           company
           mmm-mode
-          f
           magit-section
           transient
           reformatter
@@ -30,9 +29,8 @@
         doCheck = true;
         meta.description = "An emacs major mode for editing Nix expressions";
       };
+      default = self.packages.${system}.nix-mode;
     });
-
-    defaultPackage = forAllSystems (system: self.packages.${system}.nix-mode);
 
     # checks are run in ‘make check’ right now we should probably move
     # these to its own derivation
