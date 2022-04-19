@@ -16,6 +16,8 @@
 (require 'nix-instantiate)
 (require 'nix-shell)
 (require 'json)
+(eval-when-compile
+  (require 'let-alist))
 
 ;;;###autoload
 (defun nix-search--search (search file &optional no-cache use-flakes)
@@ -54,23 +56,15 @@
 (defvar-local nix-search---file nil
   "File/flake used for current buffer")
 
-(defun nix-search--refresh ()
+(defun nix-search--refresh (&rest _args)
   "Refresh Nix Search buffer"
   (interactive)
   (let ((results (nix-search--search nix-search--filter nix-search--file nil use-flakes)))
     (nix-search--display results (current-buffer) use-flakes nix-search--filter nix-search--file)))
 
-(defun nix-search-create-keymap ()
-  "Create the keymap associated with the Nix Search mode.")
-
-(defun nix-search-create-menu ()
-  "Create the Nix Search menu as shown in the menu bar."
-  (let ((m '("Nix Search"
-             ["Refresh" nix-search--refresh t])))
-    (easy-menu-define nix-search-mode-menu nix-search-mode-map "Menu keymap for Nix mode" m)))
-
-(nix-search-create-keymap)
-(nix-search-create-menu)
+(let ((m '("Nix Search"
+          ["Refresh" nix-search--refresh t])))
+  (easy-menu-define nix-search-mode-menu nix-search-mode-map "Menu keymap for Nix mode" m))
 
 (define-derived-mode nix-search-mode view-mode "Nix Search"
   "Major mode for showing Nix search results.
@@ -78,10 +72,7 @@
 \\{nix-search-mode-map}"
   :interactive nil
   :group 'nix-mode
-
-  (easy-menu-add nix-search-mode-menu)
-
-  (read-only-mode 1))
+  (setq-local revert-buffer-function #'nix-search--refresh))
 
 ;;;###autoload
 (defun nix-search--display (results &optional display-buffer use-flakes search file)
@@ -93,19 +84,18 @@
       (nix-search-mode))
     (let ((inhibit-read-only t))
       (erase-buffer)
-      (insert "-------------------------------------------------------------------------------\n")
       (dolist (entry results)
-	(let ((pname (if use-flakes
-			 (alist-get 'pname (cdr entry))
-		       (alist-get 'pkgName (cdr entry))))
-	      (version (alist-get 'version (cdr entry)))
-	      (description (alist-get 'description (cdr entry))))
-	  (put-text-property 0 (length pname) 'face 'nix-search-pname pname)
-	  (put-text-property 0 (length version) 'face 'nix-search-version version)
-	  (put-text-property 0 (length description) 'face 'nix-search-description description)
-	  (insert (format "* %s (%s)\n%s\n" pname version description))
-	  (insert "-------------------------------------------------------------------------------\n")
-	  ))))
+	(let-alist (cdr entry)
+	  (let ((pname (if use-flakes .pname .pkgName))
+	       (version .version)
+	       (description .description))
+	    (put-text-property 0 (length pname) 'face 'nix-search-pname pname)
+	    (put-text-property 0 (length version) 'face 'nix-search-version version)
+	    (put-text-property 0 (length description) 'face 'nix-search-description description)
+	    (insert (format "%s (%s)\n%s\n" pname version description))
+	    (insert (make-separator-line))
+	    )))
+      (goto-char (point-min))))
   (display-buffer display-buffer))
 
 ;;;###autoload
