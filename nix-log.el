@@ -24,14 +24,12 @@ FILE nix file to parse.
 ATTR attribute to load the log of."
   (interactive (list (nix-read-file) nil))
   (unless attr (setq attr (nix-read-attr file)))
-
   (let* ((drv-file (nix-instantiate file attr))
          (drv-name (progn
                      (string-match (format "^%s/\\(.*\\)$" nix-store-dir) drv-file)
                      (match-string 1 drv-file)))
          (log-file (format "%s/log/nix/drvs/%s/%s.bz2"
-                           nix-state-dir
-                           (substring drv-name 0 2) drv-name)))
+                     nix-state-dir (substring drv-name 0 2) (substring drv-name 2))))
     (if (file-exists-p log-file)
         (find-file log-file)
       (error "No log is available for derivation"))))
