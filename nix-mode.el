@@ -1044,7 +1044,7 @@ The hook `nix-mode-hook' is run when Nix mode is started.
   (setq-local paragraph-separate paragraph-start)
 
   ;; Menu
-  (easy-menu-add nix-mode-menu nix-mode-map)
+  ;; (easy-menu-add nix-mode-menu nix-mode-map)
 
   ;; Find file at point
   (push '(nix-mode . nix-mode-ffap-nixpkgs-path) ffap-alist)

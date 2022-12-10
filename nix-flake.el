@@ -13,6 +13,8 @@
 
 (require 'nix)
 (require 'transient)
+(eval-when-compile
+  (require 'let-alist))
 
 (defgroup nix-flake nil
   "Nix flake commands."
@@ -90,8 +92,7 @@ already registered in either the user or the global registry."
       ((split-entry
         (s)
         (split-string s "[[:space:]]+")))
-    (thread-last (nix--process-lines "registry" "list")
-      (mapcar #'split-entry))))
+    (mapcar #'split-entry (nix--process-lines "registry" "list"))))
 
 (defun nix-flake--registry-refs ()
   "Return a list of flake refs in the registry."
@@ -203,20 +204,16 @@ For PROMPT and INITIAL-INPUT, see the documentation of transient.el."
 
 (defun nix-flake--input-names ()
   "Return a list of inputs to the flake."
-  (thread-last (nix--process-json "flake" "info" nix-flake-ref "--json")
-    (alist-get 'locks)
-    (alist-get 'nodes)
-    (alist-get 'root)
-    (alist-get 'inputs)
-    (mapcar #'cdr)))
+  (let-alist (nix--process-json "flake" "metadata" nix-flake-ref "--json")
+    (mapcar #'cdr .locks.nodes.root.inputs)))
 
-(defun nix-flake--read-input-path (prompt initial-input _history)
+(defun nix-flake--read-input-path (prompt &optional initial-input history)
   "Read an input name of a flake from the user.
 
-For PROMPT and INITIAL-INPUT, see the documentation of :reader in
-transient.el."
+For PROMPT and INITIAL-INPUT and HISTORY, see the documentation
+of :reader in transient.el."
   (completing-read prompt (nix-flake--input-names)
-		   nil nil initial-input))
+		   nil nil initial-input history))
 
 ;;;;; Attribute names
 

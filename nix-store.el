@@ -118,11 +118,10 @@ respectively. The LABEL is the text displayed."
 	 (magit-insert-heading ,label)
 	 (cl-loop for x in value
 	   for exists = (file-exists-p x)
+	   for face = (if exists 'nix-store-path-realised-face 'nix-store-path-unrealised-face)
 	   do
 	   (magit-insert-section (store-path x)
-	     (insert
-	       (propertize x 'face (if exists 'nix-store-path-realised-face 'nix-store-path-unrealised-face))
-	       ?\n)))
+	     (insert (propertize x 'face face) ?\n)))
 	 (insert ?\n)
 	 (magit-insert-child-count (magit-current-section))))))
 
