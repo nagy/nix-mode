@@ -113,7 +113,7 @@ very large Nix files (all-packages.nix)."
     "derivation" "dirOf"
     "true" "false" "null"
     "isNull" "toString"
-    "fetchTarball" "import"
+    "import" "break"
     "map" "removeAttrs"
     "toString" "derivationStrict" "placeholder" "scopedImport" "fromTOML"
     "fetchTarball" "fetchGit" "fetchTree" "fetchMercurial"))

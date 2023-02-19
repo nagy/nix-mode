@@ -70,6 +70,7 @@
 
 (defvar nix-version nil)
 (defun nix-version ()
+  (declare (pure t) (side-effect-free t))
   "Get the version of Nix."
   (or nix-version (nix--process-string "--version")))
 
@@ -195,6 +196,7 @@ OPTIONS a list of options to accept."
         (version<= "2.4" (match-string 1 version))))))
 
 (defun nix-has-flakes ()
+  (declare (side-effect-free t))
   "Whether Nix is a version with Flakes support."
   ;; earlier versions reported as 3, now it’s just nix-2.4
   (and (nix-is-24)
@@ -337,14 +339,14 @@ OPTIONS a list of options to accept."
 	 (cleaned-args (seq-filter #'stringp args))
 	 (exitcode (apply #'call-process `(,nix-executable nil (t ,tmpfile) nil ,@cleaned-args )))
 	 (stderr (with-temp-buffer
-		   (insert-file-contents tmpfile)
+		   (insert-file-contents-literally tmpfile)
 		   (buffer-string))))
       (delete-file tmpfile)
       (list (buffer-string) stderr exitcode))))
 
 (defun nix--process-string (&rest args)
   (cl-multiple-value-bind (stdout stderr exitcode) (apply #'nix--process args)
-    (if (not (eq exitcode 0))
+    (unless (zerop exitcode)
       (error stderr))
     ;; cut-off the trailing newline
     (string-trim-right stdout)))
@@ -354,7 +356,7 @@ OPTIONS a list of options to accept."
     (apply #'nix--process-string args)))
 
 (defun nix--process-lines (&rest args)
-  (seq-filter (lambda (el) (not (string= "" el)))
+  (seq-remove #'string-empty-p
     (split-string
       (apply #'nix--process-string args) "\n")))
 
