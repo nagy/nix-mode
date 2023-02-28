@@ -99,7 +99,7 @@ information."
   "Insert a section showing the size of STORE-PATH."
   (magit-insert-section (size (nix-store-path-size store-path))
     (magit-insert-heading (propertize (format "%-11s" "Size:") 'face 'magit-section-heading)
-      (format "%s" (oref store-path size)))))
+      (format "%s" (file-size-human-readable (oref store-path size))))))
 
 (cl-defun nix-store-path-insert-hash (&optional (store-path nix-buffer-store-path))
   "Insert a section showing the hash of STORE-PATH."
