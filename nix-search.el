@@ -64,41 +64,37 @@
 (nix-search-create-keymap)
 (nix-search-create-menu)
 
-(define-derived-mode nix-search-mode view-mode "Nix Search"
-  "Major mode for showing Nix search results.
+(defvar-local nix-search--results nil)
+(put 'nix-search--results 'permanent-local t)
 
-\\{nix-search-mode-map}"
-  :interactive nil
-  :group 'nix-mode
-
-  (easy-menu-add nix-search-mode-menu)
-
-  (read-only-mode 1))
-
-;;;###autoload
 (defun nix-search--display (results &optional display-buffer use-flakes search file)
   (unless display-buffer (setq display-buffer (generate-new-buffer "*nix search*")))
   (with-current-buffer display-buffer
-    (setq-local nix-search--filter search)
-    (setq-local nix-search--file file)
-    (unless (derived-mode-p 'nix-search-mode)
-      (nix-search-mode))
-    (let ((inhibit-read-only t))
-      (erase-buffer)
-      (insert "-------------------------------------------------------------------------------\n")
-      (dolist (entry results)
-	(let ((pname (if use-flakes
-			 (alist-get 'pname (cdr entry))
-		       (alist-get 'pkgName (cdr entry))))
-	      (version (alist-get 'version (cdr entry)))
-	      (description (alist-get 'description (cdr entry))))
-	  (put-text-property 0 (length pname) 'face 'nix-search-pname pname)
-	  (put-text-property 0 (length version) 'face 'nix-search-version version)
-	  (put-text-property 0 (length description) 'face 'nix-search-description description)
-	  (insert (format "* %s (%s)\n%s\n" pname version description))
-	  (insert "-------------------------------------------------------------------------------\n")
-	  ))))
+    (setq nix-search--results
+	  (cl-loop for x to (- (length results) 1)
+		   for el = (cdr (elt results x))
+		   collect
+		   (list (number-to-string x)
+			 (let-alist el
+			   (vector
+			    (propertize .pname 'face 'nix-search-pname)
+			    (propertize .version 'face 'nix-search-version)
+			    (propertize .description 'face 'nix-search-description))))))
+    (nix-search-mode))
   (display-buffer display-buffer))
+
+(define-derived-mode nix-search-mode tabulated-list-mode "Nix-Search"
+  "Major mode for showing Nix search results."
+  :interactive nil
+  :group 'nix-mode
+  (setq tabulated-list-format [("Name" 30 t)
+			       ("Version" 30 t)
+			       ("Description" 0 t)]) ;; last column takes what left
+  (setq tabulated-list-entries nix-search--results)
+  (setq tabulated-list-sort-key (cons "Name" nil))
+  (tabulated-list-init-header)
+  (tabulated-list-print t))
+
 
 ;;;###autoload
 (defun nix-search (search &optional file display-buffer)
