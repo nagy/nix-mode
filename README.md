@@ -106,6 +106,10 @@ prettified, i.e. displayed as `nix-prettify-char` character (`…` by default.).
 
 This is based on a similar mode for Guix: [Prettify Mode (Emacs-Guix Reference Manual)](https://emacs-guix.gitlab.io/website/manual/0.4/html_node/Prettify-Mode.html).
 
+### nix-nar.el
+
+This package allows you to browse nar files in [Virtual Dired](https://www.gnu.org/software/emacs/manual/html_node/dired-x/Virtual-Dired.html).
+
 ## Origins
 
 This repository is based off of the nix-mode.el file originally located in

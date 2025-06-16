@@ -3,6 +3,7 @@
 ## Unreleased (1.6.0)
 
 * Introduce nix-store-path-omit-self customization option.
+* Introduce nix-nar.el, a package to browse nar files in dired.
 
 ## 1.5.0
 
