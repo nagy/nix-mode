@@ -77,6 +77,7 @@ already registered in either the user or the global registry."
 
 (defun nix-flake--to-list (x)
   "If X is not a list, make a singleton list containing it."
+  ;; use ensure-list-p with compat library
   (if (listp x)
       x
     (list x)))

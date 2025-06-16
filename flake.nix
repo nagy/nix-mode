@@ -10,11 +10,11 @@
     packages = forAllSystems (system: with (import nixpkgs { inherit system; }); {
       default = let
         emacs = emacsWithPackages (epkgs: with epkgs; [
-          org-contrib
           company
           mmm-mode
           magit-section
           transient
+          ov
         ]);
       in stdenv.mkDerivation {
         pname = "nix-mode";

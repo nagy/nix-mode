@@ -87,7 +87,7 @@ ATTRIBUTE an attribute of the Nix file to use."
      :command (append (list nix-instantiate-executable nix-file)
 		      (when attribute (list "-A" attribute)))
      :noquery t
-     :sentinel (apply-partially 'nix-instantiate--sentinel prop stderr)
+     :sentinel (apply-partially #'nix-instantiate--sentinel prop stderr)
      :stderr stderr)))
 
 (provide 'nix-instantiate)

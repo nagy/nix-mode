@@ -58,7 +58,7 @@ run:
 
 %.texi: %.org
 	emacs   --batch \
-		-l ox-extra -l ox-texinfo $< \
+		-l ox-texinfo $< \
 		-f org-texinfo-export-to-texinfo
 
 %.info: %.texi
@@ -69,5 +69,5 @@ run:
 
 %.pdf: %.org
 	emacs   --batch \
-		-l ox-extra -l ox-latex $< \
+		-l ox-latex $< \
 		-f org-latex-export-to-pdf
