@@ -115,10 +115,9 @@ enabling/disabling `nix-prettify-mode'.  If nil, do nothing.")
 (defun nix-prettify-decompose-buffer ()
   "Remove file names compositions from the current buffer."
   (with-silent-modifications
-    (let ((inhibit-read-only t))
-      (remove-text-properties (point-min)
-                              (point-max)
-                              '(composition nil)))))
+    (remove-text-properties (point-min)
+                            (point-max)
+                            '(composition nil))))
 
 ;;;###autoload
 (define-minor-mode nix-prettify-mode

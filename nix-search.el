@@ -13,9 +13,7 @@
 (require 'nix)
 (require 'nix-instantiate)
 (require 'nix-shell)
-(require 'json)
 
-;;;###autoload
 (defun nix-search--search (search file &optional no-cache use-flakes)
   (nix--process-json-nocheck "search" "--json"
 			     (unless use-flakes "--file") file
@@ -23,16 +21,12 @@
 			     (unless (string-empty-p search) search)))
 
 (defface nix-search-pname
-  '((t :height 1.5
-       :weight bold))
+  '((t :weight bold))
   "Face used for package names."
   :group 'nix-mode)
 
 (defface nix-search-version
-  '((((class color) (background dark))
-     :foreground "light blue")
-    (((class color) (background light))
-     :foreground "blue"))
+  '((t))
   "Face used for package version."
   :group 'nix-mode)
 

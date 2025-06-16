@@ -62,16 +62,17 @@
 
 (defun nix-system ()
   "Get the current system tuple."
+  (declare (pure t) (side-effect-free t))
   (nix--process-string "eval"
-    "--raw"
-    (if (nix-is-24) "--impure" )
-    (if (nix-is-24) "--expr" )
-    "(builtins.currentSystem)"))
+		       "--raw"
+		       (if (nix-is-24) "--impure" )
+		       (if (nix-is-24) "--expr" )
+		       "(builtins.currentSystem)"))
 
 (defvar nix-version nil)
 (defun nix-version ()
-  (declare (pure t) (side-effect-free t))
   "Get the version of Nix."
+  (declare (pure t) (side-effect-free t))
   (or nix-version (nix--process-string "--version")))
 
 (defun nix-show-config ()
@@ -122,7 +123,7 @@
 (defconst nix-config-options
   '("allowed-uris"
     "allow-import-from-derivation"
-    "allow-new-priveleges"
+    "allow-new-privileges"
     "allowed-users"
     "auto-optimise-store"
     "builders"
@@ -196,8 +197,8 @@ OPTIONS a list of options to accept."
         (version<= "2.4" (match-string 1 version))))))
 
 (defun nix-has-flakes ()
-  (declare (side-effect-free t))
   "Whether Nix is a version with Flakes support."
+  (declare (pure t) (side-effect-free t))
   ;; earlier versions reported as 3, now it’s just nix-2.4
   (and (nix-is-24)
        (let-alist (nix-show-config)

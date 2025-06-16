@@ -48,6 +48,7 @@
   :interactive nil
   (setq-local comint-prompt-regexp nix-prompt-regexp)
   (setq-local comint-prompt-read-only t)
+  (setq-local comint-process-echoes t)
   (let* ((is-remote (file-remote-p default-directory))
          (maybe-xdg-data-home (if is-remote
                                   (shell-command-to-string "echo -n $XDG_DATA_HOME")
