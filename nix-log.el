@@ -18,9 +18,10 @@
   "Get the nix log of path a derivation"
   (let* ((drv-name (file-relative-name drv-file nix-store-dir))
 	 (log-file (format "%s/log/nix/drvs/%s/%s.bz2"
-                           nix-state-dir
-                           (substring drv-name 0 2) (substring drv-name 2))))
-    (if (file-exists-p log-file) log-file
+			   nix-state-dir
+			   (substring drv-name 0 2) (substring drv-name 2))))
+    (if (file-exists-p log-file)
+	log-file
       (error "No log is available for derivation"))))
 
 ;;;###autoload

@@ -337,11 +337,10 @@ OPTIONS a list of options to accept."
 (defun nix--process (&rest args)
   (with-temp-buffer
     (let* ((tmpfile  (make-temp-file "nix--process-stderr"))
-	 (cleaned-args (seq-filter #'stringp args))
-	 (exitcode (apply #'call-process `(,nix-executable nil (t ,tmpfile) nil ,@cleaned-args )))
-	 (stderr (with-temp-buffer
-		   (insert-file-contents-literally tmpfile)
-		   (buffer-string))))
+	   (exitcode (apply #'call-process `(,nix-executable nil (t ,tmpfile) nil ,@(remq nil args))))
+	   (stderr (with-temp-buffer
+		     (insert-file-contents tmpfile)
+		     (buffer-string))))
       (delete-file tmpfile)
       (list (buffer-string) stderr exitcode))))
 
@@ -349,23 +348,33 @@ OPTIONS a list of options to accept."
   (cl-multiple-value-bind (stdout stderr exitcode) (apply #'nix--process args)
     (unless (zerop exitcode)
       (error stderr))
-    ;; cut-off the trailing newline
-    (string-trim-right stdout)))
+    (string-remove-suffix "\n" stdout)))
 
 (defun nix--process-json (&rest args)
-  (json-read-from-string
-    (apply #'nix--process-string args)))
+  (if (and (fboundp 'json-available-p) (json-available-p))
+      (json-parse-string (apply #'nix--process-string args) :array-type 'list :object-type 'alist)
+    (let ((json-array-type 'list))
+      (json-read-from-string (apply #'nix--process-string args)))))
+
+(defun nix--process-json (&rest args)
+  (let ((json-array-type 'list))
+    (json-read-from-string (apply #'nix--process-string args))))
 
 (defun nix--process-lines (&rest args)
   (seq-remove #'string-empty-p
-    (split-string
-      (apply #'nix--process-string args) "\n")))
+	      (split-string
+	       (apply #'nix--process-string args) "\n")))
 
 (defun nix--process-json-nocheck (&rest args)
   ;; No checking of exitcode is possible here until
   ;; https://github.com/NixOS/nix/issues/2474 is resolved
   (let ((result (apply #'nix--process args)))
     (json-read-from-string (car result))))
+
+(defmacro nix--process-let-alist (args &rest body)
+  ;; (declare (indent defun) (debug (listp body)))
+  `(let-alist (nix--process-json ,@args)
+     ,@body))
 
 (provide 'nix)
 ;;; nix.el ends here

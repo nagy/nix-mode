@@ -14,33 +14,24 @@
 
 ;;; Code:
 
-(require 'js)
 (require 'nix)
 
 ;;;###autoload
-(define-derived-mode nix-drv-mode js-mode "Nix-Derivation"
+(define-derived-mode nix-drv-mode js-json-mode "Nix-Derivation"
   "Pretty print Nix’s .drv files."
-  (let ((inhibit-read-only t))
+  (with-silent-modifications
     (erase-buffer)
-    (insert (shell-command-to-string
-             (format "%s show-derivation \"%s\""
-		     nix-executable
-		     (buffer-file-name))))
-    (set-buffer-modified-p nil)
-    (read-only-mode 1))
-
+    (insert (nix--process-string "show-derivation" (buffer-file-name))))
+  (goto-char (point-min))
   (add-hook 'change-major-mode-hook #'nix-drv-mode-dejsonify-buffer nil t))
 
 (defun nix-drv-mode-dejsonify-buffer ()
-  "Restore nix-drv-mode when switching to another mode."
-
+  "Restore `nix-drv-mode' when switching to another mode."
   (remove-hook 'change-major-mode-hook #'nix-drv-mode-dejsonify-buffer t)
-
-  (let ((inhibit-read-only t))
+  (with-silent-modifications
     (erase-buffer)
-    (insert-file-contents (buffer-file-name))
-    (set-buffer-modified-p nil)
-    (read-only-mode nil)))
+    (insert-file-contents (buffer-file-name)))
+  (goto-char (point-min)))
 
 ;;;###autoload
 (add-to-list 'auto-mode-alist '("^/nix/store/.+\\.drv\\'" . nix-drv-mode))
