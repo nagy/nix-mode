@@ -220,7 +220,7 @@ implement your own ones) you can customize the variable
 (defun nix-store-path-at-point ()
   "Return the nix-store path at point."
   (or (magit-section-value-if 'store-path)
-      (awhen (thing-at-point 'existing-filename)
+      (when-let ((it (thing-at-point 'existing-filename)))
 	(substring-no-properties it))))
 
 (defun nix-store-show-path-at-point ()
@@ -229,7 +229,7 @@ implement your own ones) you can customize the variable
 It uses \\[nix-store-show-path] to display the store path."
   (interactive)
   ;; the problem is, that this will not allow to show things like "./result"
-  (aif (nix-store-path-at-point)
+  (if-let ((it (nix-store-path-at-point)))
       (nix-store-show-path it)
     (user-error "No Nix-store-path at point")))
 
