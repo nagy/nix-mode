@@ -13,6 +13,7 @@
 
 (require 'nix)
 (require 'json)
+(require 'dash)
 
 (defun nix-instantiate--parsed (drv)
   "Get the parsed version of the .drv file.
@@ -20,30 +21,28 @@ DRV file to load from."
   (cdar
     (nix--process-json "show-derivation" drv)))
 
-(defun nix-instantiate (nix-file &optional attribute parse)
+(defun nix-instantiate (nix-file &optional attribute parse args)
   "Run nix-instantiate on a Nix expression.
 NIX-FILE the file to instantiate.
 ATTRIBUTE an attribute of the Nix file to use.
 PARSE whether to parse nix-instantiate output."
-  (interactive (list (read-file-name "Nix file: ") nil t))
-
-  (let ((stdout (generate-new-buffer "nix-instantiate"))
-	result)
-    (if attribute
-	(call-process nix-instantiate-executable nil (list stdout nil) nil
-		      nix-file "-A" attribute)
-      (call-process nix-instantiate-executable nil (list stdout nil) nil
-		    nix-file))
-    (with-current-buffer stdout
-      (when (eq (buffer-size) 0)
-	(error
-	 "Error: nix-instantiate %s failed to produce any output"
-	 nix-file))
-      (setq result (substring (buffer-string) 0 (- (buffer-size) 1)))
-      (when parse
-	(setq result (nix-instantiate--parsed result))))
-    (kill-buffer stdout)
-    result))
+  (interactive (list (read-file-name "Nix file: ") nil nil))
+  (let ((nix-executable nix-instantiate-executable)
+	(argsargs (--mapcat (list "--arg"
+				  (format "%s" (car it))
+				  (format "%s" (cdr it)))
+			    args)))
+    (cl-multiple-value-bind (stdout stderr exitcode)
+	(apply #'nix--process nix-file
+	       `(,@(when attribute `("-A" ,attribute))
+		 ,@argsargs))
+      (setq stdout (string-remove-suffix "\n" stdout))
+      (when (string-empty-p stdout)
+	(error "nix-instantiate %s failed to produce any output: %s"
+               nix-file stderr))
+      (if parse
+	  (nix-instantiate--parsed stdout)
+	stdout))))
 
 (defvar nix-instantiate--running-processes nil)
 
